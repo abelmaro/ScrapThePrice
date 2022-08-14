@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen();
 #region Services registration
 builder.Services.AddScoped<IMLScrappingService, MLScrappingService>();
 builder.Services.AddScoped<IOLXScrappingService, OLXScrappingService>();
+builder.Services.AddScoped<IFravegaScrappingService, FravegaScrappingService>();
 builder.Services.AddTransient<IWebDriverService, WebDriverService>();
 #endregion
 

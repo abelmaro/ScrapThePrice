@@ -7,18 +7,18 @@ using System.Text.RegularExpressions;
 
 namespace ScrapThePrice.Services
 {
-    public class OLXScrappingService : IOLXScrappingService
+    public class FravegaScrappingService : IFravegaScrappingService
     {
         private readonly IWebDriverService _driverService;
 
-        public OLXScrappingService(IWebDriverService driverService)
+        public FravegaScrappingService(IWebDriverService driverService)
         {
             _driverService = driverService;
         }
 
         public List<ProductModel> GetProducts(string productName)
         {
-            string url = GetOLXUrl(productName);
+            string url = GetFravgeUrl(productName);
             IWebDriver driver = _driverService.StartBrowser(url);
 
             var footer = driver.FindElement(By.TagName("footer"));
@@ -27,7 +27,7 @@ namespace ScrapThePrice.Services
             WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0,0,5));
 
 
-            var matchElements = driver.FindElements(By.CssSelector(".EIR5N")).ToList(); //TODO: Remove .ToList()
+            var matchElements = driver.FindElements(By.CssSelector(".sc-66043bd1-2 cKRLLh")).ToList(); //TODO: Remove .ToList()
             try
             {
                 if (matchElements.Any(x => x.Text.ToLower().Contains(productName.ToLower())))
@@ -55,16 +55,16 @@ namespace ScrapThePrice.Services
             {
                 try
                 {
-                    var imageEl = product.FindElement(By.CssSelector("._2grx4")).FindElement(By.TagName("img"));
+                    var imageEl = product.FindElement(By.CssSelector(".sc-3c31b0ed-1 bfwBfK")).FindElement(By.TagName("img"));
                     new Actions(driver).MoveToElement(imageEl).Perform();
 
                     result.Add(new ProductModel()
                     {
                         ImageUrl = imageEl.GetAttribute("src"),
-                        Name = product.FindElement(By.CssSelector("._2tW1I")).Text,
-                        Price = product.FindElement(By.CssSelector("._89yzn")).Text,
+                        Name = product.FindElement(By.CssSelector(".sc-6321a7c8-0 jIfrVg")).Text,
+                        Price = product.FindElement(By.CssSelector(".sc-ad64037f-0 Ojxif")).Text,
                         ProductUrl = product.FindElement(By.TagName("a")).GetAttribute("href"),
-                        Site = "OLX"
+                        Site = "FRAVEGA"
                     });
                 }
                 catch (Exception)
@@ -78,9 +78,9 @@ namespace ScrapThePrice.Services
             return result;
         }
 
-        private string GetOLXUrl(string productName)
+        private string GetFravgeUrl(string productName)
         {
-            return "https://www.olx.com.ar/items/q-" + productName.Replace(" ", "-") + "?sorting=asc-price";
+            return "https://www.fravega.com/l/?keyword=" + productName.Replace(" ", "+") + "&sorting=TOTAL_SALES_IN_LAST_30_DAYS";
         }
     }
 }

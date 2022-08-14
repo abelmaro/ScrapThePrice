@@ -6,14 +6,12 @@ namespace ScrapThePrice.Services
 {
     public class WebDriverService : IWebDriverService
     {
-        public IWebDriver driver = new ChromeDriver();
-
         public WebDriverService() {
-            driver.Manage().Timeouts().ImplicitWait = new TimeSpan(0,0,10);
+
         }
 
         public IWebDriver StartBrowser(string url) {
-
+            var driver = new ChromeDriver();
             driver.Navigate().GoToUrl(url);
             return driver;
         }

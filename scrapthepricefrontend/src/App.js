@@ -7,11 +7,14 @@ import { motion } from "framer-motion";
 function App() {
   const [productsML, setProductsML] = useState([]);
   const [productsOLX, setProductsOLX] = useState([]);
+  const [productsFravega, setProductsFravega] = useState([]);
+  const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("iPhone 13 Pro Max");
 
   const searchProducts = () => {
     getOLXProducts();
     getMLProducts();
+    getFravegaProducts();
   };
 
   function getMLProducts() {
@@ -36,6 +39,27 @@ function App() {
     });
   }
 
+  function getFravegaProducts() {
+    var url =
+      "https://localhost:7296/api/GetProductFromFravega?productName=" +
+      searchText;
+    fetch(url).then((res) => {
+      res.json().then((p) => {
+        setProductsFravega(p);
+      });
+    });
+  }
+
+  async function getFravegaProducts() {
+    var url =
+      "https://localhost:7296/api/GetProducts?productName=" + searchText;
+    fetch(url).then((res) => {
+      res.json().then((p) => {
+        setProducts(p);
+      });
+    });
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -51,7 +75,7 @@ function App() {
         {productsML.length > 0 ? (
           <motion.div
             transition={{ ease: "easeOut", duration: 1, bounce: true }}
-            className="ml-container"
+            className="products-container ml-p"
           >
             <img src="https://http2.mlstatic.com/static/org-img/homesnw/mercado-libre.png?v=2" />
 
@@ -62,9 +86,17 @@ function App() {
         )}
 
         {productsOLX.length > 0 ? (
-          <div className="olx-container">
+          <div className="products-container olx-p">
             <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/47/1a/a1/471aa1b0-ea40-2e9b-1459-46a7fab6de8a/source/200x200bb.jpg" />
             {<Slider prods={productsOLX} />}
+          </div>
+        ) : (
+          <></>
+        )}
+        {productsFravega.length > 0 ? (
+          <div className="products-container fravega-p">
+            <img src="https://static01.eu/catalogosyofertas.com.ar/images/store/3.png" />
+            {<Slider prods={productsFravega} />}
           </div>
         ) : (
           <></>

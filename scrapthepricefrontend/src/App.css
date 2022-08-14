@@ -20,7 +20,7 @@
   box-shadow: 0 0 5pt 0.5pt #D3D3D3;
 }
 
-.ml-container, .olx-container {
+.products-container {
   display: flex;
   flex-direction: row;
   justify-content: start;

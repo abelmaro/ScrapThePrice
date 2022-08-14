@@ -31,10 +31,7 @@ namespace ScrapThePrice.Services
                 url = url;
             }
 
-
             driver.Navigate().GoToUrl(url);
-            var footer = driver.FindElement(By.TagName("footer"));
-            new Actions(driver).MoveToElement(footer).Perform();
 
             var matchElements = driver.FindElements(By.CssSelector(".ui-search-layout__item")).ToList(); //TODO: Remove .ToList()
             try
@@ -50,7 +47,7 @@ namespace ScrapThePrice.Services
                 throw;
             }
             
-            var products = GetProductsFromElement(matchElements.Take(5));
+            var products = GetProductsFromElement(matchElements.Take(5), driver);
 
             return products;
         }
@@ -60,21 +57,25 @@ namespace ScrapThePrice.Services
             return "https://listado.mercadolibre.com.ar/" + productName.Replace(" ", "-") + "_OrderId_PRICE_NoIndex_True";
         }
 
-        private List<ProductModel> GetProductsFromElement(IEnumerable<IWebElement> products)
+        private List<ProductModel> GetProductsFromElement(IEnumerable<IWebElement> products, IWebDriver driver)
         {
 
             List<ProductModel> result = new List<ProductModel>();
             
             foreach (var product in products)
             {
+                var imageEl = product.FindElement(By.CssSelector(".ui-search-result-image__element"));
+                new Actions(driver).MoveToElement(imageEl).Perform();
                 result.Add(new ProductModel()
                 {
 
-                    ImageUrl = product.FindElement(By.CssSelector(".ui-search-result-image__element")).GetAttribute("src"),
+                    ImageUrl = imageEl.GetAttribute("src"),
                     Name = product.FindElement(By.CssSelector(".ui-search-item__title")).Text,
                     Price = product.FindElement(By.CssSelector(".price-tag-fraction")).Text,
                     ProductUrl = product.FindElement(By.CssSelector(".ui-search-link")).GetAttribute("href"),
+                    Site = "MERCADOLIBRE"
                 });
+                Thread.Sleep(200);
             }
 
             return result;
