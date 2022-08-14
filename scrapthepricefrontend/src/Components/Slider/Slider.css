@@ -1,0 +1,31 @@
+.item {
+    margin:  1rem 0.1rem;
+    padding: 5px;
+
+    width: 160px;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    align-content: center;
+    
+    border: 1px solid #eee;
+}
+
+.item img{
+    width: 160px;
+    height: 160px;
+    border-radius: 2rem;
+    pointer-events: none;
+    object-fit: contain;
+}
+
+.inner-carousel {
+    display: flex;
+}
+
+.carousel {
+    cursor: grab;
+    overflow: hidden;
+}

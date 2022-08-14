@@ -1,0 +1,28 @@
+.search-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-container button {
+  width: 60%;
+  border-radius: 10px;
+  border-color: white;
+}
+
+.search-bar {
+  width: 60%;
+  height: 25px;
+  margin: 0 auto;
+  border: solid 1px #ccc;
+  border-radius: 10px;
+  box-shadow: 0 0 5pt 0.5pt #D3D3D3;
+}
+
+.ml-container, .olx-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+}
