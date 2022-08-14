@@ -8,8 +8,7 @@ namespace ScrapThePrice.Services
     {
         public IWebDriver driver = new ChromeDriver();
 
-        public WebDriverService(string url) {
-            driver.Navigate().GoToUrl(url);
+        public WebDriverService() {
             driver.Manage().Timeouts().ImplicitWait = new TimeSpan(0,0,10);
         }
 

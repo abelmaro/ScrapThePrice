@@ -25,7 +25,7 @@ namespace ScrapThePrice.Services
             {
                 url = driver.FindElements(By.CssSelector("a[aria-label='Nuevo']")).First().GetAttribute("href");
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
                 url = url;
@@ -45,9 +45,9 @@ namespace ScrapThePrice.Services
                     matchElements = matchElements.Where(x => Regex.IsMatch(x.Text.ToLower(), @"" + productName.ToLower())).ToList();
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             
             var products = GetProductsFromElement(matchElements.Take(5));
