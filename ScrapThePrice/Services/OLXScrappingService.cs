@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
+using ScrapThePrice.Config;
 using ScrapThePrice.Enums;
 using ScrapThePrice.Models;
 using ScrapThePrice.Services.Interfaces;
@@ -12,11 +13,13 @@ namespace ScrapThePrice.Services
     {
         private readonly IWebDriverService _driverService;
         private readonly IProductHelperService _productHelperService;
+        private readonly ScrappingSitesConfig _config;
 
-        public OLXScrappingService(IWebDriverService driverService, IProductHelperService productHelperService)
+        public OLXScrappingService(IWebDriverService driverService, IProductHelperService productHelperService, ScrappingSitesConfig config)
         {
             _driverService = driverService;
             _productHelperService = productHelperService;
+            _config = config;
         }
 
         public List<ProductModel> GetProducts(string productName)
@@ -27,21 +30,10 @@ namespace ScrapThePrice.Services
             var footer = driver.FindElement(By.TagName("footer"));
             new Actions(driver).MoveToElement(footer).Perform();
 
-            ScrappingSelectors selectors = new ScrappingSelectors()
-            {
-                ProductContainer = ".EIR5N",
-                ProductImage = "._3Kg_w",
-                ProductName = "._2tW1I",
-                ProductPrice = "._89yzn",
-                ProductUrl = ".EIR5N",
-                Site = "OLX"
-            };
+            ScrappingSelectors selectors = _config.OLX;
 
-            var matchElements = _productHelperService.GetMatchElements(driver.FindElements(By.CssSelector(selectors.ProductContainer)).ToList(), productName); //TODO: Remove .ToList()
-
-            var products = _productHelperService.GetProductsFromElement(matchElements.Take(5), driver, selectors);
-
-            return products;
+            var products = driver.FindElements(By.CssSelector(selectors.ProductContainer)).ToList(); //TODO: Remove .ToList()
+            return _productHelperService.MatchAndGetProducts(products, driver, selectors, productName);
         }
     }
 }

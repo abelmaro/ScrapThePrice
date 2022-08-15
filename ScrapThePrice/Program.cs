@@ -1,4 +1,5 @@
 using OpenQA.Selenium.Chrome;
+using ScrapThePrice.Config;
 using ScrapThePrice.Services;
 using ScrapThePrice.Services.Interfaces;
 
@@ -8,7 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var scrappingSitesConfig = builder.Configuration.GetSection(nameof(ScrappingSitesConfig)).Get<ScrappingSitesConfig>();
+
 #region Services registration
+builder.Services.AddSingleton(scrappingSitesConfig);
 builder.Services.AddScoped<IMLScrappingService, MLScrappingService>();
 builder.Services.AddScoped<IOLXScrappingService, OLXScrappingService>();
 builder.Services.AddScoped<IFravegaScrappingService, FravegaScrappingService>();

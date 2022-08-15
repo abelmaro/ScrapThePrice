@@ -93,5 +93,15 @@ namespace ScrapThePrice.Services
 
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
+
+        public List<ProductModel> MatchAndGetProducts(List<IWebElement> products, IWebDriver driver, ScrappingSelectors selectors, string productName)
+        {
+            var matchElements = GetMatchElements(products, productName);
+
+            if (matchElements != null && matchElements.Any())
+                return GetProductsFromElement(matchElements, driver, selectors);
+            else
+                return new List<ProductModel>();
+        }
     }
 }

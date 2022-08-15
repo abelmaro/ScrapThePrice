@@ -18,15 +18,17 @@ const Slider = (props) => {
         whileTap={{ cursor: "grabbing" }}
         className="inner-carousel"
       >
-        {props.prods.map((product) => {
+        {
+        props.prods.map((product) => {
           return (
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ type: "spring" }}
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="item"
             >
               <div>
-                <img src={product.imageUrl} />
+                <img src={product.imageUrl} alt="" />
               </div>
               <div>
                 {product.name} - ${product.price}
