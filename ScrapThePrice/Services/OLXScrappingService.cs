@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
+using ScrapThePrice.Enums;
 using ScrapThePrice.Models;
 using ScrapThePrice.Services.Interfaces;
 using System.Text.RegularExpressions;
@@ -10,77 +11,37 @@ namespace ScrapThePrice.Services
     public class OLXScrappingService : IOLXScrappingService
     {
         private readonly IWebDriverService _driverService;
+        private readonly IProductHelperService _productHelperService;
 
-        public OLXScrappingService(IWebDriverService driverService)
+        public OLXScrappingService(IWebDriverService driverService, IProductHelperService productHelperService)
         {
             _driverService = driverService;
+            _productHelperService = productHelperService;
         }
 
         public List<ProductModel> GetProducts(string productName)
         {
-            string url = GetOLXUrl(productName);
+            string url = _productHelperService.GetUrl(productName, SitesEnum.OLX);
             IWebDriver driver = _driverService.StartBrowser(url);
 
             var footer = driver.FindElement(By.TagName("footer"));
             new Actions(driver).MoveToElement(footer).Perform();
 
-            WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0,0,5));
-
-
-            var matchElements = driver.FindElements(By.CssSelector(".EIR5N")).ToList(); //TODO: Remove .ToList()
-            try
+            ScrappingSelectors selectors = new ScrappingSelectors()
             {
-                if (matchElements.Any(x => x.Text.ToLower().Contains(productName.ToLower())))
-                    matchElements = matchElements.Where(x => x.Text.ToLower().Contains(productName.ToLower())).ToList();
-                else
-                    matchElements = matchElements.Where(x => Regex.IsMatch(x.Text.ToLower(), @"" + productName.ToLower())).ToList();
+                ProductContainer = ".EIR5N",
+                ProductImage = "._3Kg_w",
+                ProductName = "._2tW1I",
+                ProductPrice = "._89yzn",
+                ProductUrl = ".EIR5N",
+                Site = "OLX"
+            };
 
-            }
-            catch (Exception e)
-            {
-                matchElements = matchElements;
-            }
+            var matchElements = _productHelperService.GetMatchElements(driver.FindElements(By.CssSelector(selectors.ProductContainer)).ToList(), productName); //TODO: Remove .ToList()
 
-            var products = GetProductsFromElement(matchElements.Take(5), driver);
+            var products = _productHelperService.GetProductsFromElement(matchElements.Take(5), driver, selectors);
 
             return products;
-        }
-
-        private List<ProductModel> GetProductsFromElement(IEnumerable<IWebElement> products, IWebDriver driver)
-        {
-
-            List<ProductModel> result = new List<ProductModel>();
-
-            foreach (var product in products)
-            {
-                try
-                {
-                    var imageEl = product.FindElement(By.CssSelector("._2grx4")).FindElement(By.TagName("img"));
-                    new Actions(driver).MoveToElement(imageEl).Perform();
-
-                    result.Add(new ProductModel()
-                    {
-                        ImageUrl = imageEl.GetAttribute("src"),
-                        Name = product.FindElement(By.CssSelector("._2tW1I")).Text,
-                        Price = product.FindElement(By.CssSelector("._89yzn")).Text,
-                        ProductUrl = product.FindElement(By.TagName("a")).GetAttribute("href"),
-                        Site = "OLX"
-                    });
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("This product will be ignored: {0}.", product);
-                    continue;
-                }
-
-            }
-
-            return result;
-        }
-
-        private string GetOLXUrl(string productName)
-        {
-            return "https://www.olx.com.ar/items/q-" + productName.Replace(" ", "-") + "?sorting=asc-price";
         }
     }
 }

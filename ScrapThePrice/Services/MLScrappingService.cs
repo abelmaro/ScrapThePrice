@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using ScrapThePrice.Enums;
 using ScrapThePrice.Models;
 using ScrapThePrice.Services.Interfaces;
 using System.Text.RegularExpressions;
@@ -9,76 +10,46 @@ namespace ScrapThePrice.Services
     public class MLScrappingService : IMLScrappingService
     {
         private readonly IWebDriverService _driverService;
+        private readonly IProductHelperService _productHelperService;
 
-        public MLScrappingService(IWebDriverService driverService)
+        public MLScrappingService(IWebDriverService driverService, IProductHelperService productHelperService)
         {
             _driverService = driverService;
+            _productHelperService = productHelperService;
         }
 
         public List<ProductModel> GetProducts(string productName)
         {
-            string mlUrl = GetMlUrl(productName);
+            string mlUrl = _productHelperService.GetUrl(productName, SitesEnum.MercadoLibre);
             IWebDriver driver = _driverService.StartBrowser(mlUrl);
 
-            var url = mlUrl;
+            ScrappingSelectors selectors = new ScrappingSelectors()
+            {
+                ProductImage = ".ui-search-result-image__element",
+                ProductName = ".ui-search-item__title",
+                ProductUrl = ".ui-search-item__brand-discoverability.ui-search-item__group__element",
+                ProductPrice = ".price-tag-fraction",
+                ProductContainer = ".ui-search-layout__item",
+                Site = "MERCADOLIBRE",
+            };
+
+            var url = "";
             try
             {
                 url = driver.FindElements(By.CssSelector("a[aria-label='Nuevo']")).First().GetAttribute("href");
             }
             catch (Exception)
             {
-
-                url = url;
+                url = mlUrl;
             }
 
             driver.Navigate().GoToUrl(url);
 
-            var matchElements = driver.FindElements(By.CssSelector(".ui-search-layout__item")).ToList(); //TODO: Remove .ToList()
-            try
-            {
-                if (matchElements.Any(x => x.Text.ToLower().Contains(productName.ToLower())))
-                    matchElements = matchElements.Where(x => x.Text.ToLower().Contains(productName.ToLower())).ToList();
-                else
-                    matchElements = matchElements.Where(x => Regex.IsMatch(x.Text.ToLower(), @"" + productName.ToLower())).ToList();
+            var matchElements = _productHelperService.GetMatchElements(driver.FindElements(By.CssSelector(selectors.ProductContainer)).ToList(), productName); //TODO: Remove .ToList()
 
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            
-            var products = GetProductsFromElement(matchElements.Take(5), driver);
+            var products = _productHelperService.GetProductsFromElement(matchElements.Take(5), driver, selectors);
 
             return products;
-        }
-
-        private string GetMlUrl(string productName)
-        {
-            return "https://listado.mercadolibre.com.ar/" + productName.Replace(" ", "-") + "_OrderId_PRICE_NoIndex_True";
-        }
-
-        private List<ProductModel> GetProductsFromElement(IEnumerable<IWebElement> products, IWebDriver driver)
-        {
-
-            List<ProductModel> result = new List<ProductModel>();
-            
-            foreach (var product in products)
-            {
-                var imageEl = product.FindElement(By.CssSelector(".ui-search-result-image__element"));
-                new Actions(driver).MoveToElement(imageEl).Perform();
-                result.Add(new ProductModel()
-                {
-
-                    ImageUrl = imageEl.GetAttribute("src"),
-                    Name = product.FindElement(By.CssSelector(".ui-search-item__title")).Text,
-                    Price = product.FindElement(By.CssSelector(".price-tag-fraction")).Text,
-                    ProductUrl = product.FindElement(By.CssSelector(".ui-search-link")).GetAttribute("href"),
-                    Site = "MERCADOLIBRE"
-                });
-                Thread.Sleep(200);
-            }
-
-            return result;
         }
     }
 }

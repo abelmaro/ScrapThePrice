@@ -12,7 +12,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IMLScrappingService, MLScrappingService>();
 builder.Services.AddScoped<IOLXScrappingService, OLXScrappingService>();
 builder.Services.AddScoped<IFravegaScrappingService, FravegaScrappingService>();
+builder.Services.AddScoped<IProductHelperService, ProductHelperService>();
 builder.Services.AddTransient<IWebDriverService, WebDriverService>();
+builder.Services.AddTransient<IProductsService, ProductsService>();
 #endregion
 
 var app = builder.Build();

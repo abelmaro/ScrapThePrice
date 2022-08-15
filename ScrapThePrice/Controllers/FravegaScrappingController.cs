@@ -12,7 +12,7 @@ namespace ScrapThePrice.Controllers
         }
 
         [HttpGet]
-        [Route("/api/GetProductFromOLX")]
+        [Route("/api/GetProductFromFravega")]
         public JsonResult GetProductFromOLX(string productName)
         {
             var result = _fravegaScrappingService.GetProducts(productName);
